@@ -1,0 +1,75 @@
+﻿
+<h2>Регистрация</h2>
+<table>
+    <tr>
+        <td>Имя пользователя</td>
+        <td>
+            <input id="usernameR" type="text" value="" />
+        </td>
+    </tr>
+    <tr>
+        <td>Пароль</td>
+        <td>
+            <input id="passwordR" value="" />
+        </td>
+    </tr>   
+    <tr>
+        <td>Подтверждение пароля</td>
+        <td>
+            <input id="passwordR2" value="" />
+        </td>
+    </tr>  
+    <tr>
+        <td>Дата рождения</td>
+        <td>
+            <input id="datebirth" value="" />
+        </td>
+    </tr>
+    <tr>
+        <td>Пол</td>
+        <td>
+            <input id="gender" value="" />
+        </td>
+    </tr>
+    <tr>
+        <td>Аватар</td>
+        <td>
+            <input type="file" name="upload" id="uploadFile" accept="image/*" />
+        </td>
+    </tr>
+</table>
+<label id="messageRegistration"></label><br />
+
+    <button type="button" id="registrationForm">Зарегистрироваться</button>
+
+<script>
+    $("#registrationForm").on("click", function (e) {                                               //регистрация пользователя
+
+        if ($("#passwordR").val() != $("#passwordR2").val()) {
+            $("#messageRegistration").text("Пароль не подтвержден");
+        }
+        else {
+            const formData = new FormData();
+            formData.append('data', document.getElementById('uploadFile').files[0]);
+            formData.append('usernameR', $("#usernameR").val());
+            formData.append('datebirthR', $("#datebirth").val());
+            formData.append('genderR', $("#gender").val());
+            formData.append('passwordR', $("#passwordR").val());
+            console.log(formData);
+            $.ajax({
+                type: "POST",
+                url: "Authentication3/RegistrationSave",
+                processData: false,
+                contentType: false,
+                data: formData,
+                success: function (data) {
+                    $(".form-group").html(data);
+                    //$(".message").text('Изменения сохранены');
+                },
+                error: function (data) {
+                    $("#messageRegistration").text(data.responseText);
+                }
+            });
+        }        
+    });
+</script>

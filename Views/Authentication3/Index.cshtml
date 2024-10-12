@@ -1,0 +1,120 @@
+﻿@model ClientViewModel;
+
+<div class="form-group"> 
+    <h2>Вход на сайт</h2>
+    <div id="registrationplace">
+        <button type="button" id="registration">Зарегистрироваться</button><br />
+    </div>
+    <h3>Найдите свой аккаунт</h3>
+    @foreach(var item in Model.AvatarView)
+    {
+        <div>
+        <img src="@item.Remove(0,59)" class="imgAvatar" alt="Avatar" /><br />
+        </div>
+    } 
+    <div class="loginform">
+        <p>
+            <label>Введите логин</label><br />
+            <input id="login" />
+        </p>
+        <p>
+            <label>Введите пароль</label><br />
+            <input type="password" id="password" />
+        </p>
+        <button type="button" id="btn_login">Войти</button><br />
+        <label id="messageLogin"></label>
+    </div>
+    
+    
+</div>
+<script>
+    var userId;
+    var tokenKey = "accessToken";
+
+    $(document).ready(function () {
+        $(".imgAvatar").on("click", function (e) {          //выбор пользователя по аватарке                  
+            userId = $(e.target).attr("src").filename();
+            b = document.querySelector('.loginform');
+            if (b.style.display == 'block')
+                b.style.display = 'none'
+            else {                
+                (e.target).parentElement.append(b);
+                b.style.display = 'block';
+                btnLogin();
+            }
+        });
+        
+        function btnLogin() {
+            $("#btn_login").on("click", function (e) {      //вход пользоватля по паролю и логину
+                console.log($("#login").val());
+                console.log($("#password").val());
+                console.log(userId);
+                $.ajax({
+                    type: "POST",
+                    url: "Authentication3/TakeLogin",
+                    data: {
+                        avatarId: userId,
+                        username: $("#login").val(),
+                        password: $("#password").val()
+                    },
+                    success: function (data) {
+                        sessionStorage.setItem(tokenKey, data.access_token);                        
+                        LoginHome();                                        //вызов аякса и контроллера Home
+                    },
+                    error: function (data) {
+                        $("#messageLogin").text(data.responseText);                        
+                    }
+                });
+            });
+        }
+        
+        function LoginHome() {
+            $.ajax({
+                type: "POST",
+                url: "Authentication3/Home",
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + sessionStorage.getItem(tokenKey),
+                },
+                data: {avatarId: userId},
+                success: function (data) {
+                    console.log(data);
+                    $(".form-group").html(data);
+                },
+                error: function (data) {
+                    $("#messageLogin").text(data.responseText);
+                }
+            });
+        };
+        
+        $("#registration").on("click", function (e) {          //получение частичного представления решистрационной формы
+            $.ajax({
+                type: "POST",
+                url: "Authentication3/Registration",
+                data: {},
+                success: function (data) {                    
+                    $("#registrationplace").html(data);
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+        });
+
+        String.prototype.filename = function (extension) {        // получение id из src
+            var s = this.replace(/\\/g, '/');
+            s = s.substring(s.lastIndexOf('/') + 1);
+            return extension ? s.replace(/[?#].+$/, '') : s.split('.')[0];
+        }
+    });
+</script>
+
+<style>
+    .loginform {
+        display: none;
+    }
+
+    .info {
+        display: none;
+    }
+</style>

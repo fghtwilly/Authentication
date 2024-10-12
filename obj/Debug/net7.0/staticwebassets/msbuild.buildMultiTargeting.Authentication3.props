@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\Authentication3.props" />
+</Project>

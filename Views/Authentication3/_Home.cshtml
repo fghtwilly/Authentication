@@ -1,0 +1,121 @@
+﻿@model Client;
+<div class="form-group">
+    <h2>Ну зашел, и че дальше</h2>
+    <label id="Idclient" class="info">@Model.Id</label>
+    <table>
+        <tr>
+            <td>User Name</td>
+            <td>
+                <label id="UserName">@Model.UserName</label>
+            </td>
+        </tr>
+        <tr>
+            <td>Дата рождения</td>
+            <td>
+                <label id="DateBirth">@Model.DateBirth</label>
+            </td>
+        </tr>        
+        <tr>
+            <td>Пол</td>
+            <td>
+                <label id="Gender">@Model.Gender</label>
+            </td>
+        </tr>        
+        <tr>
+            <td>Аватар</td>
+            <td>
+                <img src="~/Avatar/@(Model.IdAvatar).jpg" class="imgAvatar" alt="Avatar" /><br />
+            </td>
+        </tr>
+    </table>
+
+    <div id="replacediv"></div>
+    <button type="button" id="btn_change">Изменить данные</button>
+    <div class="loginform">
+        <h2>Изменить данные</h2>
+        <table>
+            <tr>
+                <td>Имя пользователя</td>
+                <td>
+                    <label>@Model.UserName</label> 
+                </td>
+            </tr>
+            <tr>
+                <td>Пароль</td>
+                <td>
+                    <input id="passwordR" value="" />
+                </td>
+            </tr>
+            <tr>
+                <td>Подтверждение пароля</td>
+                <td>
+                    <input id="passwordR" value="" />
+                </td>
+            </tr>
+            <tr>
+                <td>Дата рождения</td>
+                <td>
+                    <input id="datebirth" value="@Model.DateBirth" />
+                </td>
+            </tr>
+            <tr>
+                <td>Пол</td>
+                <td>
+                    <input id="gender" value="@Model.Gender" />
+                </td>
+            </tr>
+            <tr>
+                <td>Аватар</td>
+                <td>
+                    <input type="file" name="upload" id="uploadFile" accept="image/*" />
+                </td>
+            </tr>
+        </table>
+        <button type="button" id="btn_savechange">Сохранить изменения</button>
+        <div id="responseMessage"></div>
+    </div>
+</div>
+<script>
+    function initListeners(){
+        $("#btn_change").on("click", function (e) {                                         //показать или скрыть форму с изменением данных
+            b = document.querySelector('.loginform');
+            console.log("click");
+            if (b.style.display == 'block')
+                b.style.display = 'none'
+            else {
+                b.style.display = 'block';
+            }
+        });
+
+        $("#btn_savechange").on("click", function (e) {
+            const formDataChange = new FormData();
+            formDataChange.append('data', document.getElementById('uploadFile').files[0]);
+            formDataChange.append('Idclient', $("#Idclient").text());
+            formDataChange.append('username', $("#UserName").text());
+            formDataChange.append('datebirthC', $("#datebirth").val());
+            formDataChange.append('genderC', $("#gender").val());
+            formDataChange.append('passwordC', $("#passwordR").val());
+            $.ajax({
+                type: "POST",
+                url: "Authentication3/SaveChange",
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + sessionStorage.getItem(tokenKey),
+                },
+                processData: false,
+                contentType: false,
+                data: formDataChange,
+                success: function (data) {
+                    $(".form-group").html(data);
+                    initListeners();
+                },
+                error: function (data) {
+                    $("#responseMessage").text(data.responseText);
+                }
+            });
+        });
+    };
+    $(document).ready(function () {
+        initListeners();
+    });
+</script>
